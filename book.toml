@@ -1,0 +1,24 @@
+# thanks https://github.com/joshrotenberg for his example
+# https://github.com/joshrotenberg/wtd-bayarea-mdbook
+
+[book]
+authors = ["alex zonov"]
+language = "en"
+multilingual = false
+src = "src"
+title = "attic - last resort for my notes"
+
+[rust]
+edition = "2021"
+
+[output.html]
+git-repository-url = "https://github.com/anzome/attic/tree/main"
+
+[output.html.search]
+limit-results = 20
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 2
+boost-paragraph = 1
+expand = true
+heading-split-level = 2
