@@ -6,7 +6,7 @@ authors = ["alex zonov"]
 language = "en"
 multilingual = false
 src = "src"
-title = "attic - last resort for my notes"
+title = "Attic - last resort for my notes"
 
 [rust]
 edition = "2021"
