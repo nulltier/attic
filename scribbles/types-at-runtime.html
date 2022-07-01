@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>CARGO - Attic - last resort for my notes</title>
+        <title>Distinguish types at runtime - Attic - last resort for my notes</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../scribbles/index.html"><strong aria-hidden="true">1.</strong> Scribbles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../scribbles/painful-types.html"><strong aria-hidden="true">1.1.</strong> Painful types</a></li><li class="chapter-item expanded "><a href="../scribbles/keys-for-react-components.html"><strong aria-hidden="true">1.2.</strong> Keys for React components</a></li><li class="chapter-item expanded "><a href="../scribbles/types-at-runtime.html"><strong aria-hidden="true">1.3.</strong> Distinguish types at runtime</a></li></ol></li><li class="chapter-item expanded "><a href="../chronicles/index.html"><strong aria-hidden="true">2.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chronicles/2022-july.html"><strong aria-hidden="true">2.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">3.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/volta.html"><strong aria-hidden="true">3.1.</strong> Volta</a></li></ol></li><li class="chapter-item expanded "><a href="../libs/index.html"><strong aria-hidden="true">4.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libs/npm.html"><strong aria-hidden="true">4.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="../libs/cargo.html" class="active"><strong aria-hidden="true">4.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="../topics.html"><strong aria-hidden="true">5.</strong> Topics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../scribbles/index.html"><strong aria-hidden="true">1.</strong> Scribbles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../scribbles/painful-types.html"><strong aria-hidden="true">1.1.</strong> Painful types</a></li><li class="chapter-item expanded "><a href="../scribbles/keys-for-react-components.html"><strong aria-hidden="true">1.2.</strong> Keys for React components</a></li><li class="chapter-item expanded "><a href="../scribbles/types-at-runtime.html" class="active"><strong aria-hidden="true">1.3.</strong> Distinguish types at runtime</a></li></ol></li><li class="chapter-item expanded "><a href="../chronicles/index.html"><strong aria-hidden="true">2.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chronicles/2022-july.html"><strong aria-hidden="true">2.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="../tools/index.html"><strong aria-hidden="true">3.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tools/volta.html"><strong aria-hidden="true">3.1.</strong> Volta</a></li></ol></li><li class="chapter-item expanded "><a href="../libs/index.html"><strong aria-hidden="true">4.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../libs/npm.html"><strong aria-hidden="true">4.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="../libs/cargo.html"><strong aria-hidden="true">4.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="../topics.html"><strong aria-hidden="true">5.</strong> Topics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -137,16 +137,75 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="cargo"><a class="header" href="#cargo">CARGO</a></h1>
+                        <h1 id="distinguish-types-at-runtime"><a class="header" href="#distinguish-types-at-runtime">Distinguish types at runtime</a></h1>
+<p>Often, using the typescript, you have to handle situations when you don't know the type 
+beforehand, during the compilation time. It hardly could be taken as a big problem and there are usually two or three types to choose from. But anyway, due the frequency of the situation, it is totally ok to looking for robust and concise solution.</p>
+<p>Let's look on a case with an REST endpoint that may return an error instead of a data.</p>
+<p>The simplest solution is to make all the properties of the data optional.</p>
+<pre><code class="language-typescript">interface Response {
+    price?: number;
+    errorText?: string;
+}
+
+// no properties are fine for compiler, but not for us
+let empty: Response = {};
+
+// object with price and errorText at the same time is invalid, but not for compiler if all the proerties marked optional
+let allTogether: Response = {
+  price: 100,
+  errorText: 'Price is not available'
+}; 
+</code></pre>
+<p>We have to do better than that. For that we could try the discriminated unions. They allow to enumerate the set of possible types.</p>
+<pre><code class="language-typescript">interface TileInfo {
+    price: string;
+}
+
+interface TileError {
+    errorText: string;
+}
+
+type TileData = TileInfo | TileError;
+</code></pre>
+<p>Such a construct later may be used together with the <code>in</code> operator as a type guard.</p>
+<pre><code class="language-typescript">if ('price' in data) {
+    showPrice(data);
+} else {
+    showError(data);
+}
+</code></pre>
+<p>This will work exactly as expected. The only &quot;flaw&quot; of the approach is that you have to use a string literal as name of a property. It doesn't work with the variables or enums.</p>
+<p>Because of this, a typecasting is another method to prompt a type.</p>
+<pre><code class="language-typescript">(renderingData as ResponseSuccess).accessData.forEach(doSomething);
+</code></pre>
+<p>With no other attempts to use the value of uncertain type typecasting will do the job. Otherwise, typescript will ask you to cast a type every each attempt to access a value.</p>
+<pre><code class="language-typescript">//this won't work
+if (data as TileInfo) {
+    showPrice(data.price);
+}
+
+// you have to cast type each time to make it valid
+if (data as TileInfo) {
+    showPrice(data as TileInfo).price;
+}
+</code></pre>
+<p>Both variants are ok when used appropriately to a situation.</p>
+<h2 id="links"><a class="header" href="#links">Links</a></h2>
+<ul>
+<li>Discriminated unions <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions">http://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions</a></li>
+<li>Type guarding with the <code>in</code> operator <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator">http://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator</a></li>
+<li>Type guards and type assertions <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-type-assertions">http://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-type-assertions</a></li>
+</ul>
+<p>The combination of these two approaches may help to work safely with the inputs that may provide different types.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../libs/npm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../scribbles/keys-for-react-components.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../topics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../chronicles/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -155,10 +214,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../libs/npm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../scribbles/keys-for-react-components.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../topics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../chronicles/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

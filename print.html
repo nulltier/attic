@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chronicles/index.html"><strong aria-hidden="true">1.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="chronicles/2022-july.html"><strong aria-hidden="true">1.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="tools/index.html"><strong aria-hidden="true">2.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tools/volta.html"><strong aria-hidden="true">2.1.</strong> Volta</a></li></ol></li><li class="chapter-item expanded "><a href="libs/index.html"><strong aria-hidden="true">3.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="libs/npm.html"><strong aria-hidden="true">3.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="libs/cargo.html"><strong aria-hidden="true">3.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="topics.html"><strong aria-hidden="true">4.</strong> Topics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="scribbles/index.html"><strong aria-hidden="true">1.</strong> Scribbles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="scribbles/painful-types.html"><strong aria-hidden="true">1.1.</strong> Painful types</a></li><li class="chapter-item expanded "><a href="scribbles/keys-for-react-components.html"><strong aria-hidden="true">1.2.</strong> Keys for React components</a></li><li class="chapter-item expanded "><a href="scribbles/types-at-runtime.html"><strong aria-hidden="true">1.3.</strong> Distinguish types at runtime</a></li></ol></li><li class="chapter-item expanded "><a href="chronicles/index.html"><strong aria-hidden="true">2.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="chronicles/2022-july.html"><strong aria-hidden="true">2.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="tools/index.html"><strong aria-hidden="true">3.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tools/volta.html"><strong aria-hidden="true">3.1.</strong> Volta</a></li></ol></li><li class="chapter-item expanded "><a href="libs/index.html"><strong aria-hidden="true">4.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="libs/npm.html"><strong aria-hidden="true">4.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="libs/cargo.html"><strong aria-hidden="true">4.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="topics.html"><strong aria-hidden="true">5.</strong> Topics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -138,7 +138,192 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="chronicles"><a class="header" href="#chronicles">Chronicles</a></h1>
+                        <h1 id="scribbles"><a class="header" href="#scribbles">Scribbles</a></h1>
+<p><a href="scribbles/./painful-types.html">Painful types</a></p>
+<p><a href="scribbles/./keys-for-react-components.html">Keys for React components</a></p>
+<p><a href="scribbles/./types-at-runtime.html">Distinguish types at runtime</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="types-are-painfully-helpful"><a class="header" href="#types-are-painfully-helpful">Types are painfully helpful</a></h1>
+<p>It is pretty usual when the collective and well-organised efforts of many peoples outperform abilities of a regular person. The typescript illustrates the idea routinely. The warnings and errors it raises in places which, initially I couldn't agree with, after a time of frustration bestow me a refined understanding of a code I wrote.</p>
+<p>A recent encounter with the type checking was pretty simple to describe it here with all important details, but yet in short.</p>
+<p>Let's say we want to show the tooltips like the one from the below in different places of a certain site.</p>
+<p><img src="scribbles/../media/before-2022/tooltip-example-cut.png" alt="a tooltip, random example from the https://en.wikipedia.org/wiki/Browser_engine" title="a tooltip, random example from the https://en.wikipedia.org/wiki/Browser_engine" /></p>
+<p>For the sake of maintainability it is safer to have a facade for a library used to manage tooltip positioning in different situations.</p>
+<pre><code class="language-typescript">import { TooltipLibrary } from 'tooltip-library';
+
+interface TooltipInstance {
+    new(trigger: HTMLElement, content: string, options: {event: string}): void;
+    show(): void;
+    hide(): void;
+    changeContent(content: string): void;
+    destroy(): void;
+}
+
+class TooltipFacade {
+    private tooltip: TooltipInstance;
+
+    private static getHTMLElement(selector: string): HTMLElement | null {
+        return document.querySelector(selector);
+    }
+
+    public constructor(
+        selector: string,
+        content: string,
+        options: { event: string } = { event: 'mouseover' }
+    ) {
+        const trigger = TooltipFacade.getHTMLElement(selector);
+
+        if (trigger === null) {
+            throw Error('No element found');
+        }
+
+        this.tooltip = new TooltipLibrary(trigger, content, options);
+    }
+
+    public changeContent(content: string): void {
+        this.tooltip.changeContent(content);
+    }
+
+    // ... other methods
+}
+</code></pre>
+<p>We can get a <code>null</code> from <code>querySelector</code> and have to handle it, otherwise, we will get an exception from a library. But wait. Why do we need to throw the exception to avoid an exception? Why do we need an exception?</p>
+<p>The tooltips aren't a critical part of our application. We may run without them and the users, possibly, won't even notice anything strange. It means we can replace the error throwing with a logging an error to help developers to identify the problem faster.</p>
+<pre><code class="language-typescript">// TooltipFacade.constructor
+const trigger = TooltipFacade.getHTMLElement(selector);
+
+if (trigger === null) {
+    console.error('No element found');
+    return;
+}
+
+this.tooltip = new TooltipLibrary(trigger, content, options);
+</code></pre>
+<p>Now the users of our facade are safe if the page is changed in a way they are not aware. There is no risk for them to get unhandled exception out of nowhere. That is how I was thinking out of the box. But the typescript was not agreed with the idea of mine.</p>
+<pre><code class="language-typescript">class TooltipFacade {
+    // ERROR: Property 'tooltip' has no initializer and is not definitely assigned in the constructor.
+    private tooltip: TooltipInstance;
+    // ...
+}
+</code></pre>
+<p><strong>Why?</strong> Why typescript need a tooltip not null. No one needs the method because there is no related HTML element so why the typescript is so rigid on us. It is unfair. Why smarter than a mere code compiler. We'll trick it.</p>
+<pre><code class="language-typescript">class TooltipFacade {
+    private tooltip: TooltipInstance | null = null;
+}
+</code></pre>
+<p>And, of course it won't work.</p>
+<pre><code class="language-typescript">class TooltipFacade {
+    // ...
+    public changeContent(content: string): void {
+        // Object is possibly 'null'.
+        this.tooltip.changeContent(content);
+    }
+}
+</code></pre>
+<p><strong>What?</strong> How it can be. I see the <code>constructor</code> clearly. The <code>this.tooltip</code> set with a <code>TooltipInstance</code>. How on Earth it could be null. How?! You are kidding me, typescript, right?</p>
+<pre><code class="language-typescript">// TooltipFacade.constructor
+this.tooltip = new TooltipLibrary(trigger, content, options);
+</code></pre>
+<p>It took a lot of me on running in circles before typescript reached me with its warnings. We have hidden the runtime problem from the callers of our API. And that is why they will call the methods of our facade no matter what, either we have an element on a page or we don't. And this is why typescript was trying to inform me about the problems.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="retrieving-keys-for-the-react-components"><a class="header" href="#retrieving-keys-for-the-react-components">Retrieving keys for the React components</a></h1>
+<p>React has its quirks. The <code>key</code> property React asks to set for the components, rendered within an iteration of any kind, are <a href="https://reactjs.org/docs/lists-and-keys.html">amongst them</a>.</p>
+<pre><code class="language-javascript">{
+    users.map(user =&gt; (
+        &lt;Card
+            key={user.someUniqueProperty}
+            user={user}
+        /&gt;
+    ));
+}
+</code></pre>
+<p>The habit of setting it with a unique value will save you many moments of sheer amusement. React can do interesting and even nasty things with the markup and event listeners of the components rendered in a cycle without keys.</p>
+<p>Usually, when each data piece has a unique property, this is a clear no-brainer.</p>
+<p>But, sometimes, you have to use the pieces of data with no IDs to map through to render React components. Practice shows that there are different approaches to make the things done.</p>
+<pre><code class="language-javascript">{
+    users.map(user =&gt; (
+        &lt;Card
+            key={calculateHashOfTheObject(user)}
+            user={user}
+        /&gt;
+    ));
+}
+</code></pre>
+<p>This one looks like an overhead to me. The function has to keep all hashes for each object to avoid recalculations of them on each render. And usually, developers add an external dependency to solve the task.</p>
+<p>If there is no id on data, you may add them still using the same indexes.</p>
+<pre><code class="language-javascript">const Cards = users =&gt; {
+    const [preparedUsers] = useState(
+        users.map((user, i) =&gt; ({
+            ...user,
+            id: i
+        }))
+    );
+
+    return preparedUsers.map(user =&gt; (
+        &lt;Card key={user.id} user={user} /&gt;
+    ));
+};
+</code></pre>
+<p>It works because the index set as ID only once, and won't be updated with each next render. Any other operations with the list and following re-renders won't affect id somehow.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="distinguish-types-at-runtime"><a class="header" href="#distinguish-types-at-runtime">Distinguish types at runtime</a></h1>
+<p>Often, using the typescript, you have to handle situations when you don't know the type 
+beforehand, during the compilation time. It hardly could be taken as a big problem and there are usually two or three types to choose from. But anyway, due the frequency of the situation, it is totally ok to looking for robust and concise solution.</p>
+<p>Let's look on a case with an REST endpoint that may return an error instead of a data.</p>
+<p>The simplest solution is to make all the properties of the data optional.</p>
+<pre><code class="language-typescript">interface Response {
+    price?: number;
+    errorText?: string;
+}
+
+// no properties are fine for compiler, but not for us
+let empty: Response = {};
+
+// object with price and errorText at the same time is invalid, but not for compiler if all the proerties marked optional
+let allTogether: Response = {
+  price: 100,
+  errorText: 'Price is not available'
+}; 
+</code></pre>
+<p>We have to do better than that. For that we could try the discriminated unions. They allow to enumerate the set of possible types.</p>
+<pre><code class="language-typescript">interface TileInfo {
+    price: string;
+}
+
+interface TileError {
+    errorText: string;
+}
+
+type TileData = TileInfo | TileError;
+</code></pre>
+<p>Such a construct later may be used together with the <code>in</code> operator as a type guard.</p>
+<pre><code class="language-typescript">if ('price' in data) {
+    showPrice(data);
+} else {
+    showError(data);
+}
+</code></pre>
+<p>This will work exactly as expected. The only &quot;flaw&quot; of the approach is that you have to use a string literal as name of a property. It doesn't work with the variables or enums.</p>
+<p>Because of this, a typecasting is another method to prompt a type.</p>
+<pre><code class="language-typescript">(renderingData as ResponseSuccess).accessData.forEach(doSomething);
+</code></pre>
+<p>With no other attempts to use the value of uncertain type typecasting will do the job. Otherwise, typescript will ask you to cast a type every each attempt to access a value.</p>
+<pre><code class="language-typescript">//this won't work
+if (data as TileInfo) {
+    showPrice(data.price);
+}
+
+// you have to cast type each time to make it valid
+if (data as TileInfo) {
+    showPrice(data as TileInfo).price;
+}
+</code></pre>
+<p>Both variants are ok when used appropriately to a situation.</p>
+<h2 id="links"><a class="header" href="#links">Links</a></h2>
+<ul>
+<li>Discriminated unions <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions">http://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions</a></li>
+<li>Type guarding with the <code>in</code> operator <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator">http://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator</a></li>
+<li>Type guards and type assertions <a href="http://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-type-assertions">http://www.typescriptlang.org/docs/handbook/advanced-types.html#type-guards-and-type-assertions</a></li>
+</ul>
+<p>The combination of these two approaches may help to work safely with the inputs that may provide different types.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="chronicles"><a class="header" href="#chronicles">Chronicles</a></h1>
 <p><a href="chronicles/./2022-july.html">2022-july</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="2022-july"><a class="header" href="#2022-july">2022, july</a></h1>
 <h2 id="new-react-docs-and-you-might-not-need-effects"><a class="header" href="#new-react-docs-and-you-might-not-need-effects">New React docs and &quot;You Might Not Need effects&quot;</a></h2>
@@ -152,7 +337,7 @@ tutorial and updated API reference.</p>
 <li><a href="tools/./volta.html">Volta</a> – Javascript Tool Manager  </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="volta"><a class="header" href="#volta">Volta</a></h1>
-<h2 id="links"><a class="header" href="#links">Links</a></h2>
+<h2 id="links-1"><a class="header" href="#links-1">Links</a></h2>
 <ul>
 <li><a href="https://volta.sh/">Site</a></li>
 <li><a href="https://github.com/volta-cli/volta">Repo</a></li>
