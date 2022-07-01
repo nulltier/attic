@@ -1,4 +1,4 @@
-# Attic
+- [Attic](./index.md)
 - [Scribbles](./scribbles/index.md)
   - [Painful types](./scribbles/painful-types.md)
   - [Keys for React components](./scribbles/keys-for-react-components.md)

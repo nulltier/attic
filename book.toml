@@ -11,6 +11,9 @@ title = "Attic - last resort for my notes"
 [rust]
 edition = "2021"
 
+[build]
+create-missing = false
+
 [output.html]
 git-repository-url = "https://github.com/anzome/attic/tree/main"
 
