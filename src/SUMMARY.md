@@ -1,5 +1,8 @@
 # Attic
-
+- [Scribbles](./scribbles/index.md)
+  - [Painful types](./scribbles/painful-types.md)
+  - [Keys for React components](./scribbles/keys-for-react-components.md)
+  - [Distinguish types at runtime](./scribbles/types-at-runtime.md)
 - [Chronicles](./chronicles/index.md)
   - [2022-july](./chronicles/2022-july.md)
 - [Tools](./tools/index.md)
