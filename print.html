@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Attic</a></li><li class="chapter-item expanded "><a href="scribbles/index.html"><strong aria-hidden="true">2.</strong> Scribbles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="scribbles/painful-types.html"><strong aria-hidden="true">2.1.</strong> Painful types</a></li><li class="chapter-item expanded "><a href="scribbles/keys-for-react-components.html"><strong aria-hidden="true">2.2.</strong> Keys for React components</a></li><li class="chapter-item expanded "><a href="scribbles/types-at-runtime.html"><strong aria-hidden="true">2.3.</strong> Distinguish types at runtime</a></li></ol></li><li class="chapter-item expanded "><a href="chronicles/index.html"><strong aria-hidden="true">3.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="chronicles/2022-july.html"><strong aria-hidden="true">3.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="tools/index.html"><strong aria-hidden="true">4.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tools/volta.html"><strong aria-hidden="true">4.1.</strong> Volta</a></li><li class="chapter-item expanded "><a href="tools/mdbook.html"><strong aria-hidden="true">4.2.</strong> mdbook</a></li></ol></li><li class="chapter-item expanded "><a href="libs/index.html"><strong aria-hidden="true">5.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="libs/npm.html"><strong aria-hidden="true">5.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="libs/cargo.html"><strong aria-hidden="true">5.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="topics.html"><strong aria-hidden="true">6.</strong> Topics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Attic</a></li><li class="chapter-item expanded "><a href="scribbles/index.html"><strong aria-hidden="true">2.</strong> Scribbles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="scribbles/painful-types.html"><strong aria-hidden="true">2.1.</strong> Painful types</a></li><li class="chapter-item expanded "><a href="scribbles/keys-for-react-components.html"><strong aria-hidden="true">2.2.</strong> Keys for React components</a></li><li class="chapter-item expanded "><a href="scribbles/types-at-runtime.html"><strong aria-hidden="true">2.3.</strong> Distinguish types at runtime</a></li></ol></li><li class="chapter-item expanded "><a href="chronicles/index.html"><strong aria-hidden="true">3.</strong> Chronicles</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="chronicles/2022-july.html"><strong aria-hidden="true">3.1.</strong> 2022-july</a></li></ol></li><li class="chapter-item expanded "><a href="rust-by-example.html"><strong aria-hidden="true">4.</strong> Rust by Example</a></li><li class="chapter-item expanded "><a href="tools/index.html"><strong aria-hidden="true">5.</strong> Tools</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tools/volta.html"><strong aria-hidden="true">5.1.</strong> Volta</a></li><li class="chapter-item expanded "><a href="tools/mdbook.html"><strong aria-hidden="true">5.2.</strong> mdbook</a></li></ol></li><li class="chapter-item expanded "><a href="libs/index.html"><strong aria-hidden="true">6.</strong> Libs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="libs/npm.html"><strong aria-hidden="true">6.1.</strong> NPM</a></li><li class="chapter-item expanded "><a href="libs/cargo.html"><strong aria-hidden="true">6.2.</strong> CARGO</a></li></ol></li><li class="chapter-item expanded "><a href="topics.html"><strong aria-hidden="true">7.</strong> Topics</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -335,6 +335,32 @@ React but about programming in general. And know they got their hands on React's
 <p>Don't miss it. <a href="https://beta.reactjs.org">New React docs</a>. Now with detailed step-by-step 
 tutorial and updated API reference.</p>
 <p>If you vetted with React pay special attention to <a href="https://beta.reactjs.org/learn/escape-hatches">Escape Natches</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-by-my-own-example"><a class="header" href="#rust-by-my-own-example">Rust by My Own Example</a></h1>
+<table style="float: left"><thead>
+    <th>Task</th>
+    <th>Solution</th>
+</thead><tbody>
+<tr style="vertical-align: top;"><td>
+Encode a string to URL
+</td><td>
+<p>There is no dedicated method implemented within <code>std</code>, rely on the crates. Consider
+<a href="https://crates.io/crates/urlencoding">urlencoding</a> and
+<a href="https://crates.io/crates/url">utl</a>, for example.</p>
+<p>They both are doing encoding on the binary data representation with relying on the 
+<a href="https://url.spec.whatwg.org/">URL spec</a>.</p>
+<p>Do no see any practical use of any attempts to implemen this logic on the application level.</p>
+<pre><pre class="playground"><code class="language-rust edition2021"><span class="boring">#![allow(unused)]
+</span>
+<span class="boring">fn main() {
+</span>use urlencoding::encode;
+
+let input = "https://music.yandex.ru/album/2459398/track/21484345";
+println!("{}", urlencoding::encode(input)); 
+// https%3A%2F%2Fmusic.yandex.ru%2Falbum%2F2459398%2Ftrack%2F21484345
+<span class="boring">}
+</span></code></pre></pre>
+</td></tr>
+</tbody></table>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tools"><a class="header" href="#tools">Tools</a></h1>
 <ul>
 <li><a href="tools/./volta.html">Volta</a> – Javascript Tool Manager  </li>
