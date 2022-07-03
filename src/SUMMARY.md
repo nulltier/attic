@@ -5,6 +5,7 @@
   - [Distinguish types at runtime](./scribbles/types-at-runtime.md)
 - [Chronicles](./chronicles/index.md)
   - [2022-july](./chronicles/2022-july.md)
+- [Rust by Example](./rust-by-example.md)
 - [Tools](./tools/index.md)
   - [Volta](./tools/volta.md)
   - [mdbook](./tools/mdbook.md)
