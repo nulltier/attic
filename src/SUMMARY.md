@@ -7,6 +7,7 @@
   - [2022-july](./chronicles/2022-july.md)
 - [Tools](./tools/index.md)
   - [Volta](./tools/volta.md)
+  - [mdbook](./tools/mdbook.md)
 - [Libs](./libs/index.md)
   - [NPM](./libs/npm.md)
   - [CARGO](./libs/cargo.md)
