@@ -11,7 +11,7 @@ Encode a string to URL
 
 There is no dedicated method implemented within `std`, rely on the crates. Consider
 [urlencoding](https://crates.io/crates/urlencoding) and
-[utl](https://crates.io/crates/url), for example.
+[url](https://crates.io/crates/url), for example.
 
 They both are doing encoding on the binary data representation with relying on the 
 [URL spec](https://url.spec.whatwg.org/).
