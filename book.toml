@@ -16,7 +16,6 @@ create-missing = false
 
 [output.html]
 git-repository-url = "https://github.com/anzome/attic/tree/main"
-cname = "anzome.github.io"
 
 [output.html.search]
 limit-results = 20
